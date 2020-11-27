@@ -1,27 +1,30 @@
-package edu.skku.cs.arduinorc_server
+package edu.skku.cs.arduinorc_server.gui
 
 import java.awt.BorderLayout
+import java.awt.Dimension
 import java.awt.GridLayout
 import java.awt.event.KeyEvent
 import java.awt.event.KeyListener
 import javax.swing.*
 
 class GUI(): KeyListener {
-    var image = ImageIcon("/Users/sungjaelee/Desktop/스크린샷 2020-10-02 오후 7.30.28.png")
-    val button = JButton()
+    //private var image = ImageIcon("/Users/sungjaelee/Desktop/스크린샷 2020-10-02 오후 7.30.28.png")
+    private var image: ImageIcon? = null
+    val frame = JFrame()
+    private val panel = JPanel()
+    private val button = JButton()
 
     init {
-        val frame = JFrame()
-
         button.icon = image
         button.addKeyListener(this)
 
-        val panel = JPanel()
-        panel.border = BorderFactory.createEmptyBorder(30, 30, 10, 30)
-        panel.layout = GridLayout(0, 1)
+        panel.border = BorderFactory.createEmptyBorder(0, 0, 0, 0)
+        panel.layout = GridLayout(1, 1)
         panel.add(button)
 
         frame.add(panel, BorderLayout.CENTER)
+        frame.preferredSize = Dimension(756, 1008)
+        frame.setSize(756, 1008)
         frame.defaultCloseOperation = JFrame.EXIT_ON_CLOSE
         frame.title = "Window"
         frame.pack()
@@ -56,4 +59,11 @@ class GUI(): KeyListener {
         }
     }
 
+    fun changePicture(picture: ByteArray) {
+        image = ImageIcon(picture)
+        var img = image?.image
+        img = img?.getScaledInstance(756,1008, java.awt.Image.SCALE_SMOOTH)
+        image = ImageIcon(img)
+        button.icon = image
+    }
 }
