@@ -1,5 +1,6 @@
 package edu.skku.arduinorc
 
+import kotlinx.coroutines.*
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothServerSocket
@@ -16,6 +17,7 @@ import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_main.*
+import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.io.OutputStream
 import java.util.*
@@ -60,7 +62,7 @@ class MainActivity : AppCompatActivity() {
             startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT)
         }
 
-
+/*
         val pairedDevices: Set<BluetoothDevice>? = bluetoothAdapter.bondedDevices
         pairedDevices?.forEach { device ->
             val deviceName = device.name
@@ -95,19 +97,44 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+ */
+
         timer(period= 5000L, initialDelay = 3000L) {
             val surfaceTexture = SurfaceTexture(10)
-            camera = Camera.open(1)
+            camera = Camera.open(2)
             camera.parameters.setPreviewSize(1,1)
             camera.setPreviewTexture(surfaceTexture)
             camera.startPreview()
             camera.takePicture(null, null, Camera.PictureCallback { data, camera ->
                 picByteArray = data
+
+                Log.d("asdf", "before: ${picByteArray.size}")
                 val bitmap = BitmapFactory.decodeByteArray(data, 0, data.size)
                 val matrix = Matrix()
-                matrix.setRotate(270.0f, (bitmap.width / 4).toFloat(), (bitmap.height / 4).toFloat())
+                matrix.setRotate(90.0f, bitmap.width.toFloat(), bitmap.height.toFloat())
                 pic = Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
+
+                val stream = ByteArrayOutputStream()
+                pic.compress(Bitmap.CompressFormat.JPEG, 30, stream)
+                picByteArray = stream.toByteArray()
+
+
+
+                runBlocking {
+                    try {
+                        val response = ServerApi.instance.sendPicture(
+                            PictureData("sj", picByteArray)).data
+                    } catch (e: Exception) {
+                        Log.e("asdf", "sendPicture API 호출 오류", e)
+                    }
+                }
+
+                //Log.d("asdf", "after: ${picByteArray.size}")
+                //runOnUiThread {
+                //    imageView.setImageBitmap(pic)
+                //}
             })
+
         }
 
 

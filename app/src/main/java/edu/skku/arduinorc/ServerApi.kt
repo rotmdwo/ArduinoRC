@@ -8,8 +8,8 @@ interface ServerApi {
     @GET("/api/v1/hello")
     suspend fun hello(): ApiResponse<String>
 
-    @POST("/api/v1/sendPic")
-    suspend fun sendPicture(@Body picture: ByteArray): ApiResponse<String>
+    @POST("/api/v1/sendPicture")
+    suspend fun sendPicture(@Body data: PictureData): ApiResponse<String>
 
     companion object {
         val instance = ApiGenerator().generate(ServerApi::class.java)
