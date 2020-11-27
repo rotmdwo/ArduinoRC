@@ -8,10 +8,7 @@ import android.bluetooth.BluetoothSocket
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import android.graphics.Matrix
-import android.graphics.SurfaceTexture
+import android.graphics.*
 import android.hardware.Camera
 import android.os.Bundle
 import android.util.Log
@@ -32,7 +29,7 @@ class MainActivity : AppCompatActivity() {
 
     var didFound = false
 
-    lateinit var camera: android.hardware.Camera
+    val camera = Camera.open(0)
     lateinit var picByteArray: ByteArray
     lateinit var pic: Bitmap
 
@@ -99,26 +96,24 @@ class MainActivity : AppCompatActivity() {
 
  */
 
-        timer(period= 5000L, initialDelay = 3000L) {
+
+
+        timer(period= 2000L, initialDelay = 1000L) {
+            camera.stopPreview()
             val surfaceTexture = SurfaceTexture(10)
-            camera = Camera.open(2)
             camera.parameters.setPreviewSize(1,1)
             camera.setPreviewTexture(surfaceTexture)
             camera.startPreview()
             camera.takePicture(null, null, Camera.PictureCallback { data, camera ->
-                picByteArray = data
-
-                Log.d("asdf", "before: ${picByteArray.size}")
                 val bitmap = BitmapFactory.decodeByteArray(data, 0, data.size)
                 val matrix = Matrix()
-                matrix.setRotate(90.0f, bitmap.width.toFloat(), bitmap.height.toFloat())
+                matrix.postScale(0.125f, 0.125f)
+                matrix.postRotate(90.0f)
                 pic = Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
 
                 val stream = ByteArrayOutputStream()
-                pic.compress(Bitmap.CompressFormat.JPEG, 30, stream)
+                pic.compress(Bitmap.CompressFormat.JPEG, 100, stream)
                 picByteArray = stream.toByteArray()
-
-
 
                 runBlocking {
                     try {
@@ -129,7 +124,7 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
 
-                //Log.d("asdf", "after: ${picByteArray.size}")
+
                 //runOnUiThread {
                 //    imageView.setImageBitmap(pic)
                 //}
