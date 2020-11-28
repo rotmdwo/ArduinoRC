@@ -10,6 +10,7 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.*
 import android.hardware.Camera
+import android.media.AudioManager
 import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
@@ -17,6 +18,7 @@ import kotlinx.android.synthetic.main.activity_main.*
 import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.io.OutputStream
+import java.lang.RuntimeException
 import java.util.*
 import kotlin.concurrent.timer
 
@@ -59,7 +61,7 @@ class MainActivity : AppCompatActivity() {
             startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT)
         }
 
-/*
+
         val pairedDevices: Set<BluetoothDevice>? = bluetoothAdapter.bondedDevices
         pairedDevices?.forEach { device ->
             val deviceName = device.name
@@ -94,41 +96,47 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
- */
-
-
-
         timer(period= 2000L, initialDelay = 1000L) {
-            camera.stopPreview()
-            val surfaceTexture = SurfaceTexture(10)
-            camera.parameters.setPreviewSize(1,1)
-            camera.setPreviewTexture(surfaceTexture)
-            camera.startPreview()
-            camera.takePicture(null, null, Camera.PictureCallback { data, camera ->
-                val bitmap = BitmapFactory.decodeByteArray(data, 0, data.size)
-                val matrix = Matrix()
-                matrix.postScale(0.125f, 0.125f)
-                matrix.postRotate(90.0f)
-                pic = Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
+            try {
+                camera.stopPreview()
+                val surfaceTexture = SurfaceTexture(10)
+                camera.parameters.setPreviewSize(1,1)
+                camera.setPreviewTexture(surfaceTexture)
+                camera.startPreview()
+                camera.takePicture(null, null, Camera.PictureCallback { data, camera ->
+                    val bitmap = BitmapFactory.decodeByteArray(data, 0, data.size)
+                    val matrix = Matrix()
+                    matrix.postScale(0.1f, 0.1f)
+                    matrix.postRotate(90.0f)
+                    pic = Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
 
-                val stream = ByteArrayOutputStream()
-                pic.compress(Bitmap.CompressFormat.JPEG, 100, stream)
-                picByteArray = stream.toByteArray()
+                    val stream = ByteArrayOutputStream()
+                    pic.compress(Bitmap.CompressFormat.JPEG, 100, stream)
+                    picByteArray = stream.toByteArray()
 
-                runBlocking {
-                    try {
-                        val response = ServerApi.instance.sendPicture(
-                            PictureData("sj", picByteArray)).data
-                    } catch (e: Exception) {
-                        Log.e("asdf", "sendPicture API 호출 오류", e)
+                    runBlocking {
+                        try {
+                            val response = ServerApi.instance.sendPicture(
+                                PictureData("sj", picByteArray)).data
+                            if (response != null) {
+                                for (i in response.indices) mConnectedThread.write(response.substring(i, i+1))
+                            }
+                        } catch (e: Exception) {
+                            Log.e("asdf", "sendPicture API 호출 오류", e)
+                        }
                     }
-                }
 
 
-                //runOnUiThread {
-                //    imageView.setImageBitmap(pic)
-                //}
-            })
+                    //runOnUiThread {
+                    //    imageView.setImageBitmap(pic)
+                    //}
+                })
+            } catch (e: RuntimeException) {
+                e.printStackTrace()
+            } catch (e1: IOException) {
+                e1.printStackTrace()
+            }
+
 
         }
 
