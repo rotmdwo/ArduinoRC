@@ -96,47 +96,50 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        timer(period= 2000L, initialDelay = 1000L) {
+        camera.parameters.setPreviewSize(1, 1)
+        val surfaceTexture = SurfaceTexture(10)
+        camera.setPreviewTexture(surfaceTexture)
+        camera.startPreview()
+
+        timer(period= 1000L, initialDelay = 2000L) {
+            //camera.stopPreview()
+            //camera.setPreviewTexture(surfaceTexture)
+            //camera.startPreview()
             try {
-                camera.stopPreview()
-                val surfaceTexture = SurfaceTexture(10)
-                camera.parameters.setPreviewSize(1,1)
-                camera.setPreviewTexture(surfaceTexture)
-                camera.startPreview()
                 camera.takePicture(null, null, Camera.PictureCallback { data, camera ->
+                    // 촬영하자마자 미리 프리뷰 준비
+                    camera.setPreviewTexture(surfaceTexture)
+                    camera.startPreview()
+
+                    // 압축을 위해 비트맵으로 변환
                     val bitmap = BitmapFactory.decodeByteArray(data, 0, data.size)
                     val matrix = Matrix()
-                    matrix.postScale(0.1f, 0.1f)
+                    matrix.postScale(0.175f, 0.175f)
                     matrix.postRotate(90.0f)
                     pic = Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
 
+                    // 다시 바이트 어레이로 변환
                     val stream = ByteArrayOutputStream()
-                    pic.compress(Bitmap.CompressFormat.JPEG, 100, stream)
+                    pic.compress(Bitmap.CompressFormat.JPEG, 80, stream)
                     picByteArray = stream.toByteArray()
-
+                    
                     runBlocking {
                         try {
-                            val response = ServerApi.instance.sendPicture(
-                                PictureData("sj", picByteArray)).data
+                            val response = ServerApi.instance.sendPicture(PictureData("sj", picByteArray)).data
                             if (response != null) {
-                                for (i in response.indices) mConnectedThread.write(response.substring(i, i+1))
+                                for (i in response.indices) mConnectedThread.write(response.substring(i, i + 1))
                             }
                         } catch (e: Exception) {
                             Log.e("asdf", "sendPicture API 호출 오류", e)
                         }
                     }
-
-
-                    //runOnUiThread {
-                    //    imageView.setImageBitmap(pic)
-                    //}
                 })
             } catch (e: RuntimeException) {
                 e.printStackTrace()
-            } catch (e1: IOException) {
-                e1.printStackTrace()
+                camera.stopPreview()
+                camera.setPreviewTexture(surfaceTexture)
+                camera.startPreview()
             }
-
 
         }
 
