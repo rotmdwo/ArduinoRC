@@ -4,12 +4,18 @@ import edu.skku.cs.arduinorc_server.common.ApiResponse
 import edu.skku.cs.arduinorc_server.datatype.PictureData
 import edu.skku.cs.arduinorc_server.gui.GUI
 import org.springframework.web.bind.annotation.*
+import java.io.BufferedOutputStream
+import java.io.OutputStream
+import java.io.OutputStreamWriter
+import java.lang.StringBuilder
+import java.util.*
 
 @RestController
 @RequestMapping("/api/v1")
 class Controller {
     companion object {
         val gui = GUI()
+        val buffer = LinkedList<Char>()
     }
 
     @PostMapping("/sendPicture")
@@ -17,6 +23,9 @@ class Controller {
         val picture = data.picture
         gui.changePicture(picture)
 
-        return ApiResponse.ok("OK")
+        val stringBuilder = StringBuilder()
+        while (buffer.isNotEmpty()) stringBuilder.append(buffer.poll())
+
+        return ApiResponse.ok(stringBuilder.toString())
     }
 }

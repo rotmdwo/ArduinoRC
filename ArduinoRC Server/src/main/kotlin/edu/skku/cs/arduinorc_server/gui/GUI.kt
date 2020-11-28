@@ -1,5 +1,6 @@
 package edu.skku.cs.arduinorc_server.gui
 
+import edu.skku.cs.arduinorc_server.controller.Controller.Companion.buffer
 import java.awt.BorderLayout
 import java.awt.Dimension
 import java.awt.GridLayout
@@ -43,27 +44,25 @@ class GUI(): KeyListener {
 
     override fun keyReleased(e: KeyEvent?) {
         if (e?.keyChar == 'w') {
-            println("key: 'w'")
-            image = ImageIcon("/Users/sungjaelee/Desktop/스크린샷 2020-10-02 오후 7.30.28.png")
-            button.icon = image
+            buffer.add('g')
         } else if (e?.keyChar == 'a') {
-            println("key: 'a'")
+            buffer.add('l')
         } else if (e?.keyChar == 's') {
-            println("key: 's'")
-            image = ImageIcon("/Users/sungjaelee/Desktop/스크린샷 2020-10-02 오후 7.29.46.png")
-            button.icon = image
+            buffer.add('b')
         } else if (e?.keyChar == 'd') {
-            println("key: 'd'")
+            buffer.add('r')
         } else if (e?.keyChar == ' ') {
-            println("key: ' '")
+            buffer.add('s')
         }
     }
 
     fun changePicture(picture: ByteArray) {
+        val time = System.currentTimeMillis()
         image = ImageIcon(picture)
         var img = image?.image
         img = img?.getScaledInstance(756,1008, java.awt.Image.SCALE_SMOOTH)
         image = ImageIcon(img)
         button.icon = image
+        println("${System.currentTimeMillis() - time}")
     }
 }
