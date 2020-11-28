@@ -59,9 +59,6 @@ class GUI(): KeyListener {
     fun changePicture(picture: ByteArray) {
         val time = System.currentTimeMillis()
         image = ImageIcon(picture)
-        var img = image?.image
-        img = img?.getScaledInstance(756,1008, java.awt.Image.SCALE_SMOOTH)
-        image = ImageIcon(img)
         button.icon = image
         println("${System.currentTimeMillis() - time}")
     }
