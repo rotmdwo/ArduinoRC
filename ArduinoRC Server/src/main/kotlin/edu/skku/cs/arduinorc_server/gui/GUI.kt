@@ -44,14 +44,19 @@ class GUI(): KeyListener {
 
     override fun keyReleased(e: KeyEvent?) {
         if (e?.keyChar == 'w') {
+            println("Front")
             buffer.add('g')
         } else if (e?.keyChar == 'a') {
+            println("Left")
             buffer.add('l')
         } else if (e?.keyChar == 's') {
+            println("Backward")
             buffer.add('b')
         } else if (e?.keyChar == 'd') {
+            println("Right")
             buffer.add('r')
         } else if (e?.keyChar == ' ') {
+            println("Stop")
             buffer.add('s')
         }
     }
@@ -60,6 +65,5 @@ class GUI(): KeyListener {
         val time = System.currentTimeMillis()
         image = ImageIcon(picture)
         button.icon = image
-        println("${System.currentTimeMillis() - time}")
     }
 }

@@ -122,11 +122,13 @@ class MainActivity : AppCompatActivity() {
                     val stream = ByteArrayOutputStream()
                     pic.compress(Bitmap.CompressFormat.JPEG, 80, stream)
                     picByteArray = stream.toByteArray()
-                    
+
                     runBlocking {
                         try {
                             val response = ServerApi.instance.sendPicture(PictureData("sj", picByteArray)).data
+
                             if (response != null) {
+                                Log.d("asdf",response)
                                 for (i in response.indices) mConnectedThread.write(response.substring(i, i + 1))
                             }
                         } catch (e: Exception) {
@@ -142,51 +144,10 @@ class MainActivity : AppCompatActivity() {
             }
 
         }
-
-
-        //val isDiscovered = bluetoothAdapter.startDiscovery()
-        //Log.d("asdf",""+isDiscovered)
-
-        //val filter = IntentFilter(BluetoothDevice.ACTION_FOUND)
-        //registerReceiver(receiver, filter)
-
-
-
-/*
-        val device = bluetoothAdapter.getRemoteDevice(address)
-        val method = device.javaClass.getMethod(
-            "createInsecureRfcommSocketToServiceRecord", *arrayOf<Class<*>>(
-                UUID::class.java
-            )
-        )
-        //val method = device.javaClass.getMethod("createInsecureRfcommSocketToServiceRecord", )
-        val socket = method.invoke(device, uuid) as BluetoothSocket
-
-        bluetoothAdapter.cancelDiscovery()
-
-        socket.connect()
-        Log.d("asdf","success")
-        mConnectedThread = ConnectedThread(socket)
-        mConnectedThread.start()
-
- */
     }
 
     inner class ConnectedThread(socket: BluetoothSocket) : Thread() {
         val mmOutputStream: OutputStream = socket.outputStream
-        /*
-        val mmInputStream: InputStream = socket.inputStream
-        fun run() {
-            val buffer = ByteArray(256)
-            var bytes = 0
-
-            while (true) {
-                bytes = mmInputStream.read(buffer)
-
-            }
-        }
-
-         */
 
         fun write(message: String) {
             val msgBuffer = message.toByteArray()
@@ -242,18 +203,6 @@ class MainActivity : AppCompatActivity() {
             Log.d("asdf", "connection succeeded")
             mConnectedThread = ConnectedThread(mmSocket!!)
             mConnectedThread.start()
-            /*
-            mmSocket?.use { socket ->
-                // Connect to the remote device through the socket. This call blocks
-                // until it succeeds or throws an exception.
-                socket.connect()
-                Log.d("asdf","3")
-                // The connection attempt succeeded. Perform work associated with
-                // the connection in a separate thread.
-                //manageMyConnectedSocket(socket)
-            }
-
-             */
         }
 
         // Closes the client socket and causes the thread to finish.
@@ -269,7 +218,5 @@ class MainActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         mSocket.close()
-        // Don't forget to unregister the ACTION_FOUND receiver.
-        //unregisterReceiver(receiver)
     }
 }
